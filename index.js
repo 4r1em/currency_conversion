@@ -11,6 +11,7 @@ app.use(express.json());
 app.post('/curse', async (req, res) => {
     await request({ url: url, json: true }, async (err, { body }) => {
         if (req.body[0].sell.length == 0 || req.body[0].buy.length == 0) res.send("Need valuta")
+        else if (req.body[0].sell || req.body[0].sell == 'BTC') res.send('УСТАЛ ДУМАТЬ')
         else if (req.body[0].sell == 'UAH') {
             let cashBuy = body.find(item => {
                 if (item.ccy == req.body[0].buy) {
