@@ -18,7 +18,10 @@ app.post('/currency', async (req, res) => {
     if (!currency.includes(sell) || !currency.includes(buy) || !sell || !buy) {
         return res.send(`Enter the currency from this list ${currency}`);
     };
-    if (buy !== uah && sell !== uah) return res.send("You cannot change UAH to UAH");
+    if (buy === sell) return res.send("You cannot change the same currencies");
+
+    if (buy !== uah && sell !== uah) return res.send("You must buy or sell UAH");
+
 
     await request({ url: url, json: true }, async (err, { body }) => {
         const cash = body.find(item => item.ccy == findCurrency);
