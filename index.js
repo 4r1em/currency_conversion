@@ -1,51 +1,32 @@
 const request = require('request');
 const url = 'https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5'
 const express = require('express');
-const app = new express()
-const currse = ["UAH", "RUR", "USD", "EUR"]
+const app = new express();
+const currency = ["UAH", "RUR", "USD", "EUR"];
+const uah = "UAH";
 
 app.use(express.json());
 
+app.post('/currency', async (req, res) => {
 
-app.post('/curse', async (req, res) => {
+    const sell = req.body.sell;
+    const buy = req.body.buy;
+    const money = req.body.money;
+    const findCurrency = (buy == uah) ? sell : buy;
 
-    const sell = req.body[0].sell
-    const buy = req.body[0].buy
-    const mon = req.body[0].mon
-
-    if (!+mon || !mon) res.send("Введите сумму")
-    if (!currse.includes(sell) || !currse.includes(buy) || sell.length == 0 || buy.length == 0) {
-        res.send(`Введите валюту с этого списка ${currse}`)
-    }
+    if (!+money || !money) return res.send("Enter the amount");
+    if (!currency.includes(sell) || !currency.includes(buy) || !sell || !buy) {
+        return res.send(`Enter the currency from this list ${currency}`);
+    };
+    if (buy !== uah && sell !== uah) return res.send("You cannot change UAH to UAH");
 
     await request({ url: url, json: true }, async (err, { body }) => {
-        if (sell == 'UAH') {
-            let cashBuy = body.find(item => {
-                if (item.ccy == buy) {
-                    return item
-                }
-            })
-            if (cashBuy) {
-                let exchange = mon / cashBuy['buy']
-                res.send(`Buy = ${exchange} ${cashBuy['ccy']}`)
-            }
-        } else if (sell == 'USD' || sell == 'EUR' || sell == 'RUR') {
-            let cashSell = body.find(item => {
-                if (item.ccy == sell) {
-                    return item
-                }
-            })
-            if (cashSell) {
-                let exchange = mon * cashSell['buy']
-                res.send(`Sell = ${exchange} UAH`)
-            }
-        }
+        const cash = body.find(item => item.ccy == findCurrency);
+        const sum = (buy == uah) ? cash.buy * money : money / cash.sale;
+        return res.send(`${sum}`);
     })
-
 })
 
-
-
-app.listen(3012, () => {
-    console.log('server run')
+app.listen(3020, () => {
+    console.log('Server run')
 })
